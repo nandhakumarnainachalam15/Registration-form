@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // ✅ Added useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserById } from "../Redux/userSlice";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -7,7 +7,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const ViewUser = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // ✅ Initialize navigation
+  const navigate = useNavigate();
   const { selectedUser } = useSelector((state) => state.user);
 
   useEffect(() => {
@@ -21,19 +21,36 @@ const ViewUser = () => {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="m-0">User Details</h4>
 
-        {/* 🔙 Back Button */}
-        <button
-          className="btn btn-secondary"
-          onClick={() => navigate("/")}
-        >
-          ← Back to User List
-        </button>
+        <div>
+          {/* 🔙 Back Button */}
+          <button
+            className="btn btn-secondary me-2"
+            onClick={() => navigate("/")}
+          >
+            ← Back
+          </button>
+
+          {/* ✏️ Edit Button */}
+          <button
+            className="btn btn-warning"
+            onClick={() => navigate(`/edit/${id}`)}
+          >
+            ✏️ Edit
+          </button>
+        </div>
       </div>
 
       <div className="card p-3 shadow-sm">
-        <p><strong>Name:</strong> {selectedUser.firstName} {selectedUser.lastName}</p>
-        <p><strong>Email:</strong> {selectedUser.email}</p>
-        <p><strong>Date of Birth:</strong> {new Date(selectedUser.dateOfBirth).toLocaleDateString()}</p>
+        <p>
+          <strong>Name:</strong> {selectedUser.firstName} {selectedUser.lastName}
+        </p>
+        <p>
+          <strong>Email:</strong> {selectedUser.email}
+        </p>
+        <p>
+          <strong>Date of Birth:</strong>{" "}
+          {new Date(selectedUser.dateOfBirth).toLocaleDateString()}
+        </p>
       </div>
     </div>
   );

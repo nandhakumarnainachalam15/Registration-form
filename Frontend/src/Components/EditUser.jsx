@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchUserById, updateUser, fetchUsers } from "../Redux/userSlice";
+import { fetchUserById, updateUser, fetchUsers,clearMessage} from "../Redux/userSlice";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const EditUser = () => {
@@ -18,6 +18,7 @@ const EditUser = () => {
   });
 
   useEffect(() => {
+    dispatch(clearMessage());
     dispatch(fetchUserById(id));
   }, [dispatch, id]);
 
@@ -35,12 +36,17 @@ const EditUser = () => {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    dispatch(updateUser({ id, userData: form })).then(() => {
-      dispatch(fetchUsers());
-      navigate("/");
-    });
-  };
+  e.preventDefault();
+  dispatch(updateUser({ id, userData: form })).then((res) => {
+    if (res.meta.requestStatus === "fulfilled") {
+      
+      setTimeout(() => {
+        dispatch(fetchUsers());
+        navigate("/");
+      }, 2000);
+    }
+  });
+};
 
   return (
     <div className="container mt-5 col-md-6">

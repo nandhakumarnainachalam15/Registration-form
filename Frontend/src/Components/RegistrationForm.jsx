@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../Redux/userSlice";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const RegistrationForm = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const { message, error } = useSelector((state) => state.user);
 
   const [form, setForm] = useState({
@@ -18,24 +18,53 @@ const RegistrationForm = () => {
     dateOfBirth: "",
   });
 
-  const [validationError, setValidationError] = useState("");
+  const [errors, setErrors] = useState({});
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" }); 
+  };
+
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    if (isNaN(birthDate.getTime())) return -1;
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) age--;
+    return age;
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!form.firstName.trim()) newErrors.firstName = "*First Name is required";
+    if (!form.lastName.trim()) newErrors.lastName = "*Last Name is required";
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!form.email.trim()) newErrors.email = "*Email is required";
+    else if (!emailRegex.test(form.email))
+      newErrors.email = "*Invalid email format";
+
+    if (!form.password.trim()) newErrors.password = "*Password is required";
+    else if (form.password.length < 8)
+      newErrors.password = "*Password must be at least 8 characters long";
+
+    if (form.password !== form.confirmPassword)
+      newErrors.confirmPassword = "*Passwords must match";
+
+    if (!form.dateOfBirth) newErrors.dateOfBirth = "*Date of Birth is required";
+    else if (calculateAge(form.dateOfBirth) < 18)
+      newErrors.dateOfBirth = "*Must be 18 years old";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setValidationError("");
-
-    
-    if (form.password.length < 8) {
-      setValidationError("Password must be at least 8 characters long");
-      return;
-    }
-    if (form.password !== form.confirmPassword) {
-      setValidationError("Passwords do not match");
-      return;
-    }
-
+    if (!validateForm()) return;
     dispatch(registerUser(form));
   };
 
@@ -43,7 +72,6 @@ const RegistrationForm = () => {
     <div className="container mt-5 col-md-6">
       <h3 className="text-center mb-4">User Registration</h3>
 
-    
       <div className="text-end mb-3">
         <button
           type="button"
@@ -64,9 +92,10 @@ const RegistrationForm = () => {
             className="form-control"
             value={form.firstName}
             onChange={handleChange}
-            required
-            maxLength={50}
           />
+          {errors.firstName && (
+            <small className="text-danger">{errors.firstName}</small>
+          )}
         </div>
 
         
@@ -78,9 +107,10 @@ const RegistrationForm = () => {
             className="form-control"
             value={form.lastName}
             onChange={handleChange}
-            required
-            maxLength={50}
           />
+          {errors.lastName && (
+            <small className="text-danger">{errors.lastName}</small>
+          )}
         </div>
 
         
@@ -92,8 +122,8 @@ const RegistrationForm = () => {
             className="form-control"
             value={form.email}
             onChange={handleChange}
-            required
           />
+          {errors.email && <small className="text-danger">{errors.email}</small>}
         </div>
 
         
@@ -105,9 +135,10 @@ const RegistrationForm = () => {
             className="form-control"
             value={form.password}
             onChange={handleChange}
-            required
-            minLength={8}
           />
+          {errors.password && (
+            <small className="text-danger">{errors.password}</small>
+          )}
         </div>
 
         
@@ -119,8 +150,10 @@ const RegistrationForm = () => {
             className="form-control"
             value={form.confirmPassword}
             onChange={handleChange}
-            required
           />
+          {errors.confirmPassword && (
+            <small className="text-danger">{errors.confirmPassword}</small>
+          )}
         </div>
 
         
@@ -132,14 +165,15 @@ const RegistrationForm = () => {
             className="form-control"
             value={form.dateOfBirth}
             onChange={handleChange}
-            required
           />
+          {errors.dateOfBirth && (
+            <small className="text-danger">{errors.dateOfBirth}</small>
+          )}
         </div>
 
         
-        {validationError && <div className="alert alert-warning">{validationError}</div>}
-        {error && <div className="alert alert-danger">{error}</div>}
-        {message && <div className="alert alert-success">{message}</div>}
+        {error && <div className="alert alert-danger mt-3">{error}</div>}
+        {message && <div className="alert alert-success mt-3">{message}</div>}
 
         <button className="btn btn-primary w-100 mt-3">Register</button>
       </form>

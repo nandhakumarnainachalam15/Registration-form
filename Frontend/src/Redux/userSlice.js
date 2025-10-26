@@ -1,12 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import API from "../Api/api";
 
-
 export const fetchUsers = createAsyncThunk("user/fetchAll", async () => {
   const res = await API.get("/users");
   return res.data;
 });
-
 
 export const fetchUserById = createAsyncThunk("user/fetchById", async (id, thunkAPI) => {
   try {
@@ -17,7 +15,6 @@ export const fetchUserById = createAsyncThunk("user/fetchById", async (id, thunk
   }
 });
 
-
 export const registerUser = createAsyncThunk("user/register", async (userData, thunkAPI) => {
   try {
     const res = await API.post("/users", userData);
@@ -27,7 +24,6 @@ export const registerUser = createAsyncThunk("user/register", async (userData, t
   }
 });
 
-
 export const updateUser = createAsyncThunk("user/update", async ({ id, userData }, thunkAPI) => {
   try {
     const res = await API.put(`/users/${id}`, userData);
@@ -36,7 +32,6 @@ export const updateUser = createAsyncThunk("user/update", async ({ id, userData 
     return thunkAPI.rejectWithValue(err.response?.data?.message || "Update failed");
   }
 });
-
 
 export const deleteUser = createAsyncThunk("user/delete", async (id, thunkAPI) => {
   try {
@@ -50,7 +45,13 @@ export const deleteUser = createAsyncThunk("user/delete", async (id, thunkAPI) =
 const userSlice = createSlice({
   name: "user",
   initialState: { users: [], selectedUser: null, message: "", error: "" },
-  reducers: {},
+  reducers: {
+    
+    clearMessage: (state) => {
+      state.message = "";
+      state.error = "";
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchUsers.fulfilled, (state, action) => {
@@ -79,4 +80,5 @@ const userSlice = createSlice({
   },
 });
 
+export const { clearMessage } = userSlice.actions; // ✅ export it
 export default userSlice.reducer;
